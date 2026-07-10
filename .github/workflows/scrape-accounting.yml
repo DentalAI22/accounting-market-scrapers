@@ -1,0 +1,70 @@
+# Accounting/CPA listings scraper — scheduled aggregation.
+#
+# ENABLED AT LAUNCH 2026-07-10. This is the network's THIRD vertical, now LIVE.
+# Runs ONCE DAILY (09:00 UTC) — staggered off dental (08:30) and veterinary
+# (08:30) to spread load. Do NOT restore any q3h cron: three daily verticals at
+# q3h blows the 2,000 free Linux-min/mo GitHub Actions ceiling shared per-account
+# (see NETWORK-BUILDOUT-AND-RUNCOST.md). Daily is the network standard.
+#
+# HOSTED 2026-07-10 at DentalAI22/accounting-market-scrapers, PUBLIC -> GitHub
+# Actions minutes are unlimited/free (the recommended path in the runcost doc;
+# private repos share only 2,000 free Linux-min/mo across the account and dental
+# already sits near that cliff). The job pushes back with the default GITHUB_TOKEN
+# (permissions.contents: write) — no PAT needed.
+#
+# Mirrors the dental TDPM + veterinary GitHub Action pattern: checkout -> install
+# deps -> run scrapers -> normalize -> commit the updated dataset back to THIS repo.
+# The SITE repos (accounting / accountingpractice) PULL listings.json from this
+# repo's raw URL at build time — no cross-repo push credentials required.
+
+name: Scrape Accounting Listings
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 9 * * *"    # daily full refresh at 09:00 UTC (free-tier-safe; staggered off vet 08:30)
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scrapers + normalize
+        run: python run_all.py
+
+      - name: Sanity-check dataset (guard the live source of truth)
+        # The live sites PULL this listings.json at build time, so a collapsed
+        # scrape (runner IP blocked -> empty CSVs) must NOT be committed or it
+        # would wipe the sites on their next build. Fail loudly and keep the
+        # last-good committed dataset. Floor is deliberately low (<20 of ~130) so
+        # real single-source churn still flows; it only trips on a near-total collapse.
+        run: |
+          COUNT=$(python -c "import json;print(len(json.load(open('listings.json'))))")
+          echo "listings.json contains $COUNT listings"
+          if [ "$COUNT" -lt 20 ]; then
+            echo "::error::Dataset collapsed to $COUNT listings (<20) — refusing to commit; keeping last-good."
+            exit 1
+          fi
+
+      - name: Commit refreshed dataset
+        run: |
+          git config user.name  "accounting-scraper-bot"
+          git config user.email "jonathan@tdibroker.com"
+          git add listings.json output/*.csv site_id_registry.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(accounting): refresh listings $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          else
+            echo "No listing changes."
+          fi
