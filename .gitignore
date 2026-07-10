@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# OS / editor / agent artifacts
+.DS_Store
+.env
+.env.*
+.claude/
+
+# NOTE: listings.json, output/*.csv, site_id_registry.json and broker_codes.json
+# are INTENTIONALLY tracked — the (disabled) GitHub Action regenerates and commits the
+# dataset back to this repo, and the live sites pull listings.json from here.

@@ -1,0 +1,40 @@
+{
+  "_README": "Accounting/CPA broker source registry. Mirrors the veterinary TVM rig and dental TDPM broker_codes.json pattern. site_prefix TAM = The Accounting Market (feeds theaccountingmarket.com + theaccountingpracticemarket.com sibling). NEVER collides with dental's TDPM- or veterinary's TVM-. 'ref_prefix' is the source-scoped broker reference shown muted on cards (e.g. APS #TXN6465). 'aggregator: true' sources are treated like the blocked aggregators and purged by the normalizer.",
+  "site_prefix": "TAM",
+  "sources": {
+    "aps": {
+      "broker_name": "Accounting Practice Sales",
+      "broker_url": "https://accountingpracticesales.com/apslistings/",
+      "ref_prefix": "APS",
+      "aggregator": false
+    },
+    "accountingbiz": {
+      "broker_name": "Accounting Biz Brokers",
+      "broker_url": "https://accountingbizbrokers.com/listings/",
+      "ref_prefix": "ABB",
+      "aggregator": false
+    },
+    "naab": {
+      "broker_name": "NAAB Consulting",
+      "broker_url": "https://www.naabconsulting.com/practices-for-sale/",
+      "ref_prefix": "NAAB",
+      "aggregator": false
+    },
+    "poe": {
+      "broker_name": "Poe Group Advisors",
+      "broker_url": "https://poegroupadvisors.com/buying/usa-cpa-firms-for-sale/",
+      "ref_prefix": "POE",
+      "aggregator": false
+    },
+    "ppt": {
+      "broker_name": "Private Practice Transitions",
+      "broker_url": "https://privatepracticetransitions.com/business-industry/accounting-tax/",
+      "ref_prefix": "PPT",
+      "aggregator": false
+    }
+  },
+  "blocked_aggregators": [
+    "bizbuysell", "bizquest", "loopnet", "dealstream", "businessbroker",
+    "practiceorbit", "provide", "tusk"
+  ]
+}
