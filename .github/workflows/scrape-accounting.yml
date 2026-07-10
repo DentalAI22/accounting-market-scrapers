@@ -64,7 +64,7 @@ jobs:
           git add listings.json output/*.csv site_id_registry.json
           if ! git diff --cached --quiet; then
             git commit -m "chore(accounting): refresh listings $(date -u +%Y-%m-%dT%H:%MZ)"
-            git push
+            git pull --rebase origin main && git push
           else
             echo "No listing changes."
           fi
